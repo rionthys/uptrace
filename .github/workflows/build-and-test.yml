@@ -1,7 +1,7 @@
 name: build-and-test
 on:
   push:
-    branches: [master]
+    branches: [master, chore/*]
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
   pull_request:
@@ -24,14 +24,14 @@ jobs:
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
       - name: Cache Go
         id: module-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             /home/runner/go/pkg/mod
           key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
       - name: Cache Tools
         id: tool-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /home/runner/go/bin
           key: v1-tools-${{ runner.os }}-${{ hashFiles('./pkg/internal/tools/go.mod') }}
@@ -61,7 +61,7 @@ jobs:
       - name: Compile Vue
         run: make uptrace-vue
       - name: Upload Vue Dist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: uptrace-vue
           path: ./vue/dist/*
@@ -92,23 +92,24 @@ jobs:
           go-version: '1.22'
       - name: Cache Go
         id: module-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             /home/runner/go/pkg/mod
           key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
       - name: Download Vue Dist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: uptrace-vue
           path: ./vue/dist/
       - name: Build Binaries for ${{ matrix.binary }}
         run: make uptrace-${{ matrix.binary }}
       - name: Upload Binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: uptrace-binaries
           path: ./bin/*
+          if-no-files-found: error
 
   build-package:
     runs-on: ubuntu-latest
@@ -127,7 +128,7 @@ jobs:
       - name: Install fpm
         run: gem install --no-document fpm -v 1.15.1
       - name: Download Binaries
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: uptrace-binaries
           path: bin/
@@ -144,10 +145,11 @@ jobs:
           ./internal/packaging/fpm/${{ matrix.package_type }}/build.sh "${{
           steps.github_tag.outputs.tag }}" "arm64" "./dist/"
       - name: Upload Packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: uptrace-packages
           path: ./dist/*
+          if-no-files-found: error
 
   publish-dev:
     runs-on: ubuntu-latest
@@ -163,7 +165,7 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@v1
       - name: Download Binaries
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: uptrace-binaries
           path: ./bin/
@@ -201,19 +203,19 @@ jobs:
           mkdir bin/
       - name: Cache Tools
         id: tool-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /home/runner/go/bin
           key: v1-tools-${{ runner.os }}-${{ hashFiles('./pkg/internal/tools/go.mod') }}
       - name: Download Binaries
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: uptrace-binaries
           path: ./bin/
       - name: Add Permissions to binaries
         run: chmod -R +x ./bin
       - name: Download Packages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: uptrace-packages
           path: ./dist/
