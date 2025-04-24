@@ -147,7 +147,7 @@ jobs:
       - name: Upload Packages
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: uptrace-packages
+          name: uptrace-packages-${{ matrix.package_type }}
           path: ./dist/*
           if-no-files-found: error
 
@@ -167,7 +167,7 @@ jobs:
       - name: Download Binaries
         uses: actions/download-artifact@v4
         with:
-          name: uptrace-binaries
+          pattern: uptrace_*
           path: ./bin/
       - name: Add Permissions to binaries
         run: chmod -R +x ./bin
@@ -210,14 +210,14 @@ jobs:
       - name: Download Binaries
         uses: actions/download-artifact@v4
         with:
-          name: uptrace-binaries
+          pattern: uptrace_*
           path: ./bin/
       - name: Add Permissions to binaries
         run: chmod -R +x ./bin
       - name: Download Packages
         uses: actions/download-artifact@v4
         with:
-          name: uptrace-packages
+          pattern: uptrace-packages-*
           path: ./dist/
       - name: Add Permissions to packages
         run: chmod -R +x ./dist
