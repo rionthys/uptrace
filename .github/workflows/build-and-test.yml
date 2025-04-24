@@ -15,31 +15,20 @@ jobs:
         with:
           submodules: true
       - name: Setup Go
-        uses: actions/setup-go@v2.1.4
+        uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-      - name: Setup Go Environment
-        run: |
-          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-      - name: Cache Go
-        id: module-cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            /home/runner/go/pkg/mod
-          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
-      - name: Cache Tools
-        id: tool-cache
-        uses: actions/cache@v3
-        with:
-          path: /home/runner/go/bin
-          key: v1-tools-${{ runner.os }}-${{ hashFiles('./pkg/internal/tools/go.mod') }}
+          check-latest: true
+          cache-dependency-path: |
+            go.sum
+            ./pkg/internal/tools/go.sum
+#      - name: Setup Go Environment
+#        run: |
+#          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+#          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
       - name: Install dependencies
-        if: steps.module-cache.outputs.hit != 'true'
         run: make gomoddownload
       - name: Install Tools
-        if: steps.tool-cache.outputs.cache-hit != 'true'
         run: make install-tools
 
   build-vue:
@@ -82,21 +71,17 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: true
-      - name: Setup Go Environment
-        run: |
-          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+#      - name: Setup Go Environment
+#        run: |
+#          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+#          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
       - name: Setup Go
-        uses: actions/setup-go@v2.1.4
+        uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-      - name: Cache Go
-        id: module-cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            /home/runner/go/pkg/mod
-          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
+          check-latest: true
+          cache-dependency-path: |
+            go.sum
       - name: Download Vue Dist
         uses: actions/download-artifact@v4
         with:
@@ -193,20 +178,25 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@v1
       - name: Setup Go
-        uses: actions/setup-go@v2.1.4
+        uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-      - name: Setup Go Environment
-        run: |
-          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-          mkdir bin/
-      - name: Cache Tools
-        id: tool-cache
-        uses: actions/cache@v3
-        with:
-          path: /home/runner/go/bin
-          key: v1-tools-${{ runner.os }}-${{ hashFiles('./pkg/internal/tools/go.mod') }}
+          check-latest: true
+          cache-dependency-path: |
+            go.sum
+            ./pkg/internal/tools/go.sum
+#      - name: Setup Go Environment
+#        run: |
+#          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+#          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+#          mkdir bin/
+#      - name: Cache Tools
+#        id: tool-cache
+#        uses: actions/cache@v3
+#        with:
+#          path: /home/runner/go/bin
+#          key: v1-tools-${{ runner.os }}-${{ hashFiles('./pkg/internal/tools/go.mod') }}
+#        continue-on-error: true
       - name: Download Binaries
         uses: actions/download-artifact@v4
         with:
